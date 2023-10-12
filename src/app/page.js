@@ -1,95 +1,178 @@
-import Image from 'next/image'
-import styles from './page.module.css'
+"use client";
+import { useState, useEffect, forwardRef } from "react";
+import { debounce } from "@mui/material/utils";
+import Box from "@mui/material/Box";
+import Grid from "@mui/material/Unstable_Grid2";
+import Paper from "@mui/material/Paper";
+import InputBase from "@mui/material/InputBase";
+import Divider from "@mui/material/Divider";
+import { Tooltip, Snackbar } from "@mui/material";
+import IconButton from "@mui/material/IconButton";
+import SearchIcon from "@mui/icons-material/Search";
+import BookmarkIcon from "@mui/icons-material/Bookmark";
+import MuiAlert from "@mui/material/Alert";
+import DirectionsIcon from "@mui/icons-material/Directions";
+import { DataGrid } from "@mui/x-data-grid";
 
-export default function Home() {
+export default function HomePage() {
+  const [search, setSearch] = useState("");
+  const [searchData, setSearchData] = useState([]);
+  const [load, setLoad] = useState(false);
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (search && search !== "") {
+      setLoad(true);
+      searchRepo(search).then((res) => {
+        setSearchData(res?.items);
+        setLoad(false);
+        debugger;
+      });
+    }
+  }, [search]);
+
+  const columns = [
+    {
+      field: "name",
+      headerName: "Name",
+      width: 250,
+      editable: true,
+    },
+    {
+      field: "owner",
+      headerName: "Owner",
+      // sortable: false,
+      width: 260,
+      valueGetter: (params) => `${params.row.owner.login || ""}`,
+    },
+    {
+      field: "description",
+      headerName: "Description",
+      // type: "number",
+      width: 900,
+      editable: true,
+    },
+    {
+      field: "stargazers_count",
+      headerName: "Stars",
+      width: 100,
+      editable: true,
+    },
+    {
+      // flex: 0.1,
+      field: "operations",
+      // minWidth: 200,
+      width: 100,
+      // headerName: "Operations",
+      renderCell: ({ row }) => {
+        const [disable, setDisable] = useState(false);
+        return (
+          <Box sx={{ display: "flex", alignItems: "center" }}>
+            <Tooltip title="Bookmark">
+              <IconButton
+                size="small"
+                color="primary"
+                onClick={() => {
+                  const storedData = localStorage.getItem("bookMarkedList");
+                  const arr = storedData ? JSON.parse(storedData) : [];
+                  arr.push(row);
+                  window.localStorage.setItem(
+                    "bookMarkedList",
+                    JSON.stringify(arr)
+                  );
+                  setDisable(true);
+                  setOpen(true);
+                }}
+                disabled={disable}
+              >
+                <BookmarkIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          </Box>
+        );
+      },
+    },
+  ];
+
   return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>src/app/page.js</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <>
+      <Grid container spacing={1}>
+        <Grid item xs={12}>
+          <Paper
+            component="form"
+            sx={{
+              // p: "2px 4px",
+              mb: 2,
+              display: "flex",
+              alignItems: "center",
+              // width: 400,
+            }}
           >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
+            <InputBase
+              fullWidth
+              onChange={debounce((e) => {
+                setSearch(e.target.value);
+              }, 500)}
+              sx={{ ml: 1, flex: 1 }}
+              placeholder="Search for GitHub repositories by name"
+              inputProps={{
+                "aria-label": "Search for GitHub repositories by name",
+              }}
             />
-          </a>
-        </div>
-      </div>
-
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className={styles.grid}>
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p>Find in-depth information about Next.js features and API.</p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Learn <span>-&gt;</span>
-          </h2>
-          <p>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p>Explore the Next.js 13 playground.</p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
-  )
+            <Divider sx={{ height: 28, m: 0.5 }} orientation="vertical" />
+            <IconButton type="button" sx={{ p: "10px" }} aria-label="search">
+              <SearchIcon />
+            </IconButton>
+          </Paper>
+        </Grid>
+        <Grid item xs={12}>
+          <Box sx={{ minHeight: "400px", width: "100%" }}>
+            <DataGrid
+              autoHeight
+              disableSelectionOnClick
+              rows={searchData}
+              columns={columns}
+              initialState={{
+                pagination: {
+                  paginationModel: {
+                    pageSize: 10,
+                  },
+                },
+              }}
+              pageSizeOptions={[10]}
+              loading={load}
+              // checkboxSelection
+              disableRowSelectionOnClick
+            />
+          </Box>
+        </Grid>
+      </Grid>
+      <Snackbar
+        open={open}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+        autoHideDuration={6000}
+        onClose={() => setOpen(false)}
+      >
+        <Alert severity="success" sx={{ width: "100%" }}>
+          Bookmarked!
+        </Alert>
+      </Snackbar>
+    </>
+  );
 }
+
+const Alert = forwardRef(function Alert(props, ref) {
+  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
+
+const searchRepo = async (query) => {
+  const url = `https://api.github.com/search/repositories?q=${query}`;
+  const response = await fetch(url, {
+    method: "get",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  const data = await response.json();
+  return data;
+};
