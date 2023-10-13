@@ -26,7 +26,6 @@ export default function HomePage() {
       searchRepo(search).then((res) => {
         setSearchData(res?.items);
         setLoad(false);
-        debugger;
       });
     }
   }, [search]);
@@ -36,7 +35,7 @@ export default function HomePage() {
       field: "name",
       headerName: "Name",
       width: 250,
-      editable: true,
+      // editable: true,
     },
     {
       field: "owner",
@@ -49,14 +48,15 @@ export default function HomePage() {
       field: "description",
       headerName: "Description",
       // type: "number",
-      width: 900,
-      editable: true,
+      minWidth: 350,
+      resizable: true,
+      // maxWidth: 900,
+      // width: 900,
     },
     {
       field: "stargazers_count",
       headerName: "Stars",
       width: 100,
-      editable: true,
     },
     {
       // flex: 0.1,

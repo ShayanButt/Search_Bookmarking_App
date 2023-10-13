@@ -29,8 +29,10 @@ const columns = [
     field: "description",
     headerName: "Description",
     // type: "number",
-    width: 900,
-    editable: true,
+    minWidth: 350,
+    resizable: true,
+    // maxWidth: 900,
+    // width: 900,
   },
   {
     field: "stargazers_count",
